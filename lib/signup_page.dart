@@ -144,7 +144,8 @@ class _MySignUpPageState extends State<MySignUpPage> {
               SizedBox(
                 height: screenHeight * 0.05,
               ),
-              buildTextfield("Enter Username", Icons.person_outlined, false, 1000),
+              buildTextfield(
+                  "Enter Username", Icons.person_outlined, false, 1000),
               SizedBox(
                 height: screenHeight * 0.03,
               ),
@@ -253,7 +254,8 @@ class _MySignUpPageState extends State<MySignUpPage> {
                       onTap: () {
                         Navigator.pushReplacement(
                           context,
-                          MaterialPageRoute(builder: (context) => MyLoginPage()),
+                          MaterialPageRoute(
+                              builder: (context) => MyLoginPage()),
                         );
                       },
                       child: Text(
