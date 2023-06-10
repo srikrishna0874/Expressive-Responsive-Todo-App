@@ -166,18 +166,18 @@ class _ShowTasksPageState extends State<ShowTasksPage> {
                         ),
                       ],
                     ),
-                    Container(
+                    SizedBox(
                       width: screenWidth,
-                      height: screenHeight*0.1,
+                      height: screenHeight * 0.1,
                       child: SingleChildScrollView(
                         scrollDirection: Axis.horizontal,
                         child: Row(
                           children: ele.map((value) {
                             return Container(
-                              width: screenWidth*0.4,
+                              width: screenWidth * 0.4,
                               height: screenHeight * 0.08,
-                              margin: EdgeInsets.only(right: 5.0),
-                              padding: EdgeInsets.only(top: 10,bottom: 10),
+                              margin: EdgeInsets.only(right: 5.0, left: 5.0),
+                              padding: EdgeInsets.only(top: 10, bottom: 10),
                               decoration: BoxDecoration(
                                 borderRadius: BorderRadius.circular(20),
                                 color: Colors.white,
@@ -186,9 +186,9 @@ class _ShowTasksPageState extends State<ShowTasksPage> {
                                     color: Colors.grey,
                                     spreadRadius: 0,
                                     blurRadius: 10,
-                                    offset: Offset(1,1),
+                                    offset: Offset(1, 1),
                                   )
-                                ]
+                                ],
                               ),
                               child: Stack(
                                 children: [
@@ -219,6 +219,21 @@ class _ShowTasksPageState extends State<ShowTasksPage> {
                           }).toList(),
                         ),
                       ),
+                    ),
+                    SizedBox(
+                      height: screenHeight*0.03,
+                    ),
+                    Row(
+                      children: [
+                        Text(
+                          "Tasks List",
+                          style: TextStyle(
+                            color: Colors.black,
+                            fontWeight: FontWeight.bold,
+                            fontSize: screenWidth * 0.06,
+                          ),
+                        ),
+                      ],
                     ),
                   ],
                 ),
