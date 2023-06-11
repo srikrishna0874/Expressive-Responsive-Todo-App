@@ -19,7 +19,15 @@ class _ShowTasksPageState extends State<ShowTasksPage> {
 
   String longText = "Sri Krishna Venkata Subbarao";
 
-  List<String> ele = ["Hi", "Hello", "World"];
+  List<String> ele = [
+    "Hi",
+    "Hello",
+    "World",
+    "Sri",
+    "Krishna",
+    "Venkata",
+    "Subbarao"
+  ];
   @override
   Widget build(BuildContext context) {
     double screenWidth = MediaQuery.of(context).size.width;
@@ -200,18 +208,32 @@ class _ShowTasksPageState extends State<ShowTasksPage> {
                                       width: 4.0,
                                     ),
                                   ),
-                                  Padding(
-                                    padding: EdgeInsets.all(8.0),
-                                    child: Align(
-                                      alignment: Alignment.centerLeft,
-                                      child: Text(
-                                        value,
-                                        style: TextStyle(
-                                          fontSize: 16,
-                                          color: Colors.black,
+                                  Column(
+                                    children: [
+                                      Padding(
+                                        padding: EdgeInsets.only(
+                                            top: 8.0, left: 8.0),
+                                        child: Align(
+                                          alignment: Alignment.centerLeft,
+                                          child: Text(
+                                            value,
+                                            style: TextStyle(
+                                              fontSize: 16,
+                                              fontWeight: FontWeight.bold,
+                                              color: Colors.black,
+                                            ),
+                                          ),
                                         ),
                                       ),
-                                    ),
+                                      Padding(
+                                        padding:
+                                            const EdgeInsets.only(left: 8.0),
+                                        child: Align(
+                                          alignment: Alignment.centerLeft,
+                                          child: Text("Hello"),
+                                        ),
+                                      )
+                                    ],
                                   )
                                 ],
                               ),
@@ -221,7 +243,7 @@ class _ShowTasksPageState extends State<ShowTasksPage> {
                       ),
                     ),
                     SizedBox(
-                      height: screenHeight*0.03,
+                      height: screenHeight * 0.03,
                     ),
                     Row(
                       children: [
@@ -234,6 +256,84 @@ class _ShowTasksPageState extends State<ShowTasksPage> {
                           ),
                         ),
                       ],
+                    ),
+                    SizedBox(
+                      height: screenHeight * 0.01,
+                    ),
+                    SizedBox(
+                      width: screenWidth,
+                      height: screenHeight * 0.5,
+                      child: SingleChildScrollView(
+                        child: Column(
+                          children: ele.map((value) {
+                            return Container(
+                              width: screenWidth,
+                              height: screenHeight * 0.08,
+                              margin: EdgeInsets.only(
+                                  right: 5.0, left: 5.0, bottom: 10.0),
+                              padding: EdgeInsets.only(top: 10, bottom: 10),
+                              decoration: BoxDecoration(
+                                borderRadius: BorderRadius.circular(20),
+                                color: Colors.white,
+                                boxShadow: [
+                                  BoxShadow(
+                                    color: Colors.grey,
+                                    spreadRadius: 0,
+                                    blurRadius: 10,
+                                    offset: Offset(1, 1),
+                                  )
+                                ],
+                              ),
+                              child: Stack(
+                                children: [
+                                  Align(
+                                    alignment: Alignment.centerRight,
+                                    child: Container(
+                                      margin: EdgeInsets.only(right: 8.0),
+                                      color: Colors.orange,
+                                      width: 4.0,
+                                    ),
+                                  ),
+                                  Column(
+                                    children: [
+                                      Padding(
+                                        padding: EdgeInsets.only(
+                                            top: 8.0, left: 8.0),
+                                        child: Align(
+                                          alignment: Alignment.centerLeft,
+                                          child: Text(
+                                            value,
+                                            style: TextStyle(
+                                              fontSize: 16,
+                                              fontWeight: FontWeight.bold,
+                                              color: Colors.black,
+                                            ),
+                                          ),
+                                        ),
+                                      ),
+                                      Padding(
+                                        padding:
+                                            const EdgeInsets.only(left: 8.0),
+                                        child: Align(
+                                          alignment: Alignment.centerLeft,
+                                          child: Text("Hello"),
+                                        ),
+                                      )
+                                    ],
+                                  )
+                                ],
+                              ),
+                            );
+                          }).toList(),
+                        ),
+                      ),
+                    ),
+                    SizedBox(
+                      height: screenHeight*0.03,
+                    ),
+                    ElevatedButton(
+                      onPressed: () {},
+                      child: Text("Create Task"),
                     ),
                   ],
                 ),
