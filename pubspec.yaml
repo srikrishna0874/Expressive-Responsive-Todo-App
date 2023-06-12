@@ -39,6 +39,7 @@ dependencies:
   delayed_display: ^2.0.0
   google_fonts: ^4.0.3
   text_divider: ^1.0.0
+  percent_indicator: ^4.2.3
 
 dev_dependencies:
   flutter_test:

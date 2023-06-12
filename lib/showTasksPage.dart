@@ -1,4 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:percent_indicator/circular_percent_indicator.dart';
+
+import 'addTasksPage.dart';
 
 class ShowTasksPage extends StatefulWidget {
   const ShowTasksPage({Key? key}) : super(key: key);
@@ -271,7 +274,10 @@ class _ShowTasksPageState extends State<ShowTasksPage> {
                               height: screenHeight * 0.08,
                               margin: EdgeInsets.only(
                                   right: 5.0, left: 5.0, bottom: 10.0),
-                              padding: EdgeInsets.only(top: 10, bottom: 10),
+                              padding: EdgeInsets.only(
+                                  top: 10,
+                                  bottom: 10,
+                                  left: screenWidth * 0.05),
                               decoration: BoxDecoration(
                                 borderRadius: BorderRadius.circular(20),
                                 color: Colors.white,
@@ -294,31 +300,59 @@ class _ShowTasksPageState extends State<ShowTasksPage> {
                                       width: 4.0,
                                     ),
                                   ),
-                                  Column(
+                                  Row(
                                     children: [
-                                      Padding(
-                                        padding: EdgeInsets.only(
-                                            top: 8.0, left: 8.0),
-                                        child: Align(
-                                          alignment: Alignment.centerLeft,
-                                          child: Text(
-                                            value,
-                                            style: TextStyle(
-                                              fontSize: 16,
-                                              fontWeight: FontWeight.bold,
-                                              color: Colors.black,
-                                            ),
+                                      CircularPercentIndicator(
+                                        animation: true,
+                                        startAngle: 0.0,
+                                        animationDuration: 1500,
+                                        radius: screenWidth * 0.06,
+                                        percent: 0.75,
+                                        progressColor:
+                                            Color.fromRGBO(255, 101, 36, 1),
+                                        center: Text(
+                                          "75%",
+                                          style: TextStyle(
+                                            color: Colors.black,
+                                            fontWeight: FontWeight.bold,
+                                            fontSize: screenWidth * 0.03,
                                           ),
                                         ),
                                       ),
-                                      Padding(
-                                        padding:
-                                            const EdgeInsets.only(left: 8.0),
-                                        child: Align(
-                                          alignment: Alignment.centerLeft,
-                                          child: Text("Hello"),
-                                        ),
-                                      )
+                                      SizedBox(
+                                        width: screenWidth * 0.03,
+                                      ),
+                                      Column(
+                                        mainAxisAlignment:
+                                            MainAxisAlignment.start,
+                                        crossAxisAlignment:
+                                            CrossAxisAlignment.start,
+                                        children: [
+                                          Padding(
+                                            padding: EdgeInsets.only(
+                                                top: 8.0, left: 8.0),
+                                            child: Align(
+                                              alignment: Alignment.centerLeft,
+                                              child: Text(
+                                                value,
+                                                style: TextStyle(
+                                                  fontSize: 16,
+                                                  fontWeight: FontWeight.w900,
+                                                  color: Colors.black,
+                                                ),
+                                              ),
+                                            ),
+                                          ),
+                                          Padding(
+                                            padding: const EdgeInsets.only(
+                                                left: 8.0),
+                                            child: Align(
+                                              alignment: Alignment.centerLeft,
+                                              child: Text("Hello"),
+                                            ),
+                                          )
+                                        ],
+                                      ),
                                     ],
                                   )
                                 ],
@@ -329,11 +363,37 @@ class _ShowTasksPageState extends State<ShowTasksPage> {
                       ),
                     ),
                     SizedBox(
-                      height: screenHeight*0.03,
+                      height: screenHeight * 0.03,
                     ),
                     ElevatedButton(
-                      onPressed: () {},
-                      child: Text("Create Task"),
+                      onPressed: () {
+                        Navigator.push(context, MaterialPageRoute(builder: (context)=>AddTasks()));
+                      },
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: Color.fromRGBO(255, 101, 36, 1),
+                        minimumSize:
+                            Size(screenWidth * 0.7, screenHeight * 0.05),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(20),
+                        ),
+                      ),
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Icon(Icons.add_circle),
+                          SizedBox(
+                            width: screenWidth*0.01,
+                          ),
+                          Text("Create Task",style: TextStyle(
+                            color: Colors.white,
+                            fontWeight: FontWeight.bold,
+                            fontSize: screenWidth*0.045,
+                          ),),
+                        ],
+                      ),
+                    ),
+                    SizedBox(
+                      height: screenHeight * 0.05,
                     ),
                   ],
                 ),
