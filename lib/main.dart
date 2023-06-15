@@ -1,8 +1,11 @@
 import 'package:flutter/material.dart';
 
+import 'db/mongodb.dart';
 import 'home.dart';
 
-void main() {
+void main() async{
+  WidgetsFlutterBinding.ensureInitialized();
+  await MongoDataBase.connect();
   runApp(const MyApp());
 }
 

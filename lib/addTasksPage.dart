@@ -3,6 +3,7 @@ import 'package:flutter/scheduler.dart';
 import 'package:intl/intl.dart';
 
 enum Priority {
+  // ignore: constant_identifier_names
   Low,
   Medium,
   High,
@@ -56,6 +57,31 @@ class _AddTasksState extends State<AddTasks> {
       selectedPriority = priority;
     });
     print("${selectedPriority}");
+  }
+
+  Color snackBarColor(Priority priority) {
+    if (priority == Priority.Low) {
+      return Color.fromRGBO(59, 219, 56, 1);
+    } else if (priority == Priority.Medium) {
+      return Color.fromRGBO(251, 195, 67, 1);
+    } else {
+      return Color.fromRGBO(255, 81, 81, 1);
+    }
+  }
+
+  void showSnackBar(String message, Priority priority) {
+    final snackBar = SnackBar(
+      content: Text(message,style: TextStyle(color: Colors.black,fontWeight: FontWeight.w500,),),
+      backgroundColor: snackBarColor(priority),
+      elevation: 10,
+      behavior: SnackBarBehavior.floating,
+      margin: EdgeInsets.all(10),
+      duration: Duration(seconds: 1),
+      dismissDirection: DismissDirection.startToEnd,
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+
+    );
+    ScaffoldMessenger.of(context).showSnackBar(snackBar);
   }
 
   @override
@@ -260,6 +286,8 @@ class _AddTasksState extends State<AddTasks> {
                         ElevatedButton(
                           onPressed: selectedPriority != Priority.Low
                               ? () {
+                                  showSnackBar("Priority: Low is Selected",
+                                      Priority.Low);
                                   changePriority(Priority.Low);
                                   print("${selectedPriority}");
                                 }
@@ -277,6 +305,8 @@ class _AddTasksState extends State<AddTasks> {
                         ElevatedButton(
                           onPressed: selectedPriority != Priority.Medium
                               ? () {
+                                  showSnackBar("Priority: Medium is Selected",
+                                      Priority.Medium);
                                   changePriority(Priority.Medium);
                                 }
                               : null,
@@ -293,6 +323,8 @@ class _AddTasksState extends State<AddTasks> {
                         ElevatedButton(
                           onPressed: selectedPriority != Priority.High
                               ? () {
+                                  showSnackBar("Priority: High is Selected",
+                                      Priority.High);
                                   changePriority(Priority.High);
                                 }
                               : null,
