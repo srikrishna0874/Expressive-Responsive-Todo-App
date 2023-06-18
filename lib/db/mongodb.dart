@@ -13,6 +13,7 @@ class MongoDataBase {
     var status = db.serverStatus();
     print("\n\n\n\n\n\n${status}\n\n\n\n\n\n");
     var collectionUsers = db.collection(COLLECTION_NAME1);
+
     print(await collectionUsers.find().toList());
   }
 }
