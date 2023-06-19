@@ -1,6 +1,7 @@
 import 'package:delayed_display/delayed_display.dart';
 import 'package:flutter/material.dart';
 import 'package:text_divider/text_divider.dart';
+import 'package:todo/db/mongodb.dart';
 import 'package:todo/showTasksPage.dart';
 
 import 'login_page.dart';
@@ -14,6 +15,11 @@ class MySignUpPage extends StatefulWidget {
 
 class _MySignUpPageState extends State<MySignUpPage> {
   bool isVisiblePassword = true;
+  TextEditingController usernameController = TextEditingController();
+  TextEditingController emailController = TextEditingController();
+  TextEditingController passwordController = TextEditingController();
+  String message = "";
+  MongoDataBase mongodb = MongoDataBase();
 
   Widget buildSuffixIcon() {
     if (isVisiblePassword == true) {
@@ -43,8 +49,8 @@ class _MySignUpPageState extends State<MySignUpPage> {
     }
   }
 
-  Widget buildTextfield(
-      String hintText, IconData icon, bool isObscured, int ms) {
+  Widget buildTextfield(String hintText, IconData icon, bool isObscured, int ms,
+      TextEditingController controller) {
     return DelayedDisplay(
       delay: Duration(milliseconds: ms),
       child: Container(
@@ -61,6 +67,7 @@ class _MySignUpPageState extends State<MySignUpPage> {
           borderRadius: BorderRadius.circular(50),
         ),
         child: TextField(
+          controller: controller,
           obscureText: isObscured ? isVisiblePassword : false,
           decoration: InputDecoration(
             suffixIcon: isObscured ? buildSuffixIcon() : null,
@@ -79,6 +86,29 @@ class _MySignUpPageState extends State<MySignUpPage> {
         ),
       ),
     );
+  }
+
+  bool validateEmail(String email) {
+    final emailRegex = RegExp(
+        r'^[\w-]+(\.[\w-]+)*@[a-zA-Z0-9-]+(\.[a-zA-Z0-9-]+)*(\.[a-zA-Z]{2,})$');
+
+    return emailRegex.hasMatch(email);
+  }
+
+  bool validatePassword(String password) {
+    final passwordRegex =
+        RegExp(r'^(?=.*?[A-Z])(?=.*?[a-z])(?=.*?[0-9]).{8,}$');
+
+    return passwordRegex.hasMatch(password);
+  }
+
+  bool validateForm() {
+    final email = emailController.text;
+    final password = passwordController.text;
+
+    final isEmailValid = validateEmail(email);
+    final isPasswordValid = validatePassword(password);
+    return isEmailValid && isPasswordValid && usernameController.text != "";
   }
 
   @override
@@ -144,18 +174,18 @@ class _MySignUpPageState extends State<MySignUpPage> {
               SizedBox(
                 height: screenHeight * 0.05,
               ),
-              buildTextfield(
-                  "Enter Username", Icons.person_outlined, false, 1000),
+              buildTextfield("Enter Username", Icons.person_outlined, false,
+                  1000, usernameController),
               SizedBox(
                 height: screenHeight * 0.03,
               ),
-              buildTextfield(
-                  "Enter your Email", Icons.email_outlined, false, 1250),
+              buildTextfield("Enter your Email", Icons.email_outlined, false,
+                  1250, emailController),
               SizedBox(
                 height: screenHeight * 0.03,
               ),
-              buildTextfield(
-                  "Enter your Password", Icons.lock_outlined, true, 1500),
+              buildTextfield("Enter your Password", Icons.lock_outlined, true,
+                  1500, passwordController),
               SizedBox(
                 height: screenHeight * 0.08,
               ),
@@ -165,11 +195,52 @@ class _MySignUpPageState extends State<MySignUpPage> {
                   padding: EdgeInsets.only(left: 10, right: 10),
                   child: ElevatedButton(
                     onPressed: () {
-                      Navigator.pushReplacement(
-                        context,
-                        MaterialPageRoute(
-                            builder: (context) => ShowTasksPage()),
-                      );
+                      bool isValidDetails = validateForm();
+                      if (isValidDetails) {
+                        mongodb.insertForSignUp(usernameController.text,
+                            emailController.text, passwordController.text);
+                        /*Navigator.pushReplacement(
+                            context,
+                            MaterialPageRoute(
+                                builder: (context) => ShowTasksPage()));*/
+                      } else {
+                        setState(() {
+                          message = "Enter Valid Email/Password";
+                        });
+                        final snackBar = SnackBar(
+                          content: Row(
+                            children: [
+                              Icon(
+                                Icons.close,
+                                color: Colors.white,
+                                size: screenWidth * 0.05,
+                              ),
+                              SizedBox(
+                                width: screenWidth * 0.01,
+                              ),
+                              Text(
+                                message,
+                                style: TextStyle(
+                                  color: Colors.white,
+                                  fontWeight: FontWeight.w500,
+                                ),
+                              ),
+                            ],
+                          ),
+                          backgroundColor: Colors.red,
+                          elevation: 10,
+                          behavior: SnackBarBehavior.floating,
+                          margin: EdgeInsets.all(10),
+                          duration: Duration(seconds: 2),
+                          dismissDirection: DismissDirection.startToEnd,
+                          shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(20)),
+                        );
+                        ScaffoldMessenger.of(context).showSnackBar(snackBar);
+                        usernameController.text = "";
+                        emailController.text = "";
+                        passwordController.text = "";
+                      }
                     },
                     style: ElevatedButton.styleFrom(
                       backgroundColor: Color.fromRGBO(255, 101, 36, 1),
