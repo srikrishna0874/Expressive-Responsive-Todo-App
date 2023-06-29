@@ -1,2 +1,3 @@
-const MONGO_URL = "mongodb+srv://test:test@cluster0.xydlo25.mongodb.net/test?retryWrites=true&w=majority";
-const COLLECTION_NAME1 = "users";
+const url = 'http://192.168.0.103:3000/';
+
+const registrationUrl = '${url}registration';

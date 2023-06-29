@@ -1,8 +1,16 @@
+import 'dart:convert';
+
 import 'package:delayed_display/delayed_display.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:text_divider/text_divider.dart';
 import 'package:todo/showTasksPage.dart';
 import 'package:todo/signup_page.dart';
+import 'package:http/http.dart' as http;
+
+import 'db/constants.dart';
 
 class MyLoginPage extends StatefulWidget {
   const MyLoginPage({Key? key}) : super(key: key);
@@ -15,6 +23,8 @@ class _MyLoginPageState extends State<MyLoginPage> {
   TextEditingController _emailController = TextEditingController();
   TextEditingController _passwordController = TextEditingController();
   bool isVisiblePassword = true;
+  String message = "";
+  late SharedPreferences prefs;
 
   Widget buildSuffixIcon() {
     if (isVisiblePassword == true) {
@@ -80,6 +90,59 @@ class _MyLoginPageState extends State<MyLoginPage> {
         ),
       ),
     );
+  }
+
+  bool validateEmail(String email) {
+    final emailRegex = RegExp(
+        r'^[\w-]+(\.[\w-]+)*@[a-zA-Z0-9-]+(\.[a-zA-Z0-9-]+)*(\.[a-zA-Z]{2,})$');
+
+    return emailRegex.hasMatch(email);
+  }
+
+  bool validatePassword(String password) {
+    final passwordRegex =
+        RegExp(r'^(?=.*?[A-Z])(?=.*?[a-z])(?=.*?[0-9]).{8,}$');
+
+    return passwordRegex.hasMatch(password);
+  }
+
+  bool validateForm() {
+    final email = _emailController.text;
+    final password = _passwordController.text;
+
+    final isEmailValid = validateEmail(email);
+    final isPasswordValid = validatePassword(password);
+    return isEmailValid && isPasswordValid;
+  }
+
+  Future<bool> loginUser(String email, String password) async {
+    var reqBody = {"email": email, "password": password};
+
+    try {
+      var response = await http.post(
+        Uri.parse(registrationUrl),
+        headers: {"Content-Type": "application/json"},
+        body: jsonEncode(reqBody),
+      );
+      var jsonResponse = jsonDecode(response.body);
+      if (jsonResponse["status"]) {
+        return true;
+      } else {
+        return false;
+      }
+    } catch (error) {
+      print(error);
+      return false;
+    }
+  }
+
+  Future<void> initSharedPref() async {
+    prefs = await SharedPreferences.getInstance();
+  }
+
+  @override
+  void initState() {
+    initSharedPref();
   }
 
   @override
@@ -185,7 +248,78 @@ class _MyLoginPageState extends State<MyLoginPage> {
                 child: Container(
                   padding: EdgeInsets.only(left: 10, right: 10),
                   child: ElevatedButton(
-                    onPressed: () {
+                    onPressed: () async {
+                      bool isValidDetails = validateForm();
+                      if (isValidDetails) {
+                        await showDialog(
+                          context: context,
+                          barrierDismissible: false,
+                          builder: (BuildContext context) {
+                            return Dialog(
+                              child: Container(
+                                height: screenHeight * 0.1,
+                                padding: EdgeInsets.all(16.0),
+                                child: Row(
+                                  mainAxisSize: MainAxisSize.min,
+                                  children: [
+                                    CircularProgressIndicator(),
+                                    SizedBox(
+                                      width: 16.0,
+                                    ),
+                                    Text("Please wait..."),
+                                  ],
+                                ),
+                              ),
+                            );
+                          },
+                        );
+                        Future<bool> response = loginUser(
+                            _emailController.text, _passwordController.text);
+                        if (await response) {
+                          Navigator.pushReplacement(
+                            context,
+                            MaterialPageRoute(
+                                builder: (context) => ShowTasksPage()),
+                          );
+                        } else {
+                          setState(() {
+                            message = "Enter Valid Email/Password";
+                          });
+                          final snackBar = SnackBar(
+                            content: Row(
+                              children: [
+                                Icon(
+                                  Icons.close,
+                                  color: Colors.white,
+                                  size: screenWidth * 0.05,
+                                ),
+                                SizedBox(
+                                  width: screenWidth * 0.01,
+                                ),
+                                Text(
+                                  message,
+                                  style: TextStyle(
+                                    color: Colors.white,
+                                    fontWeight: FontWeight.w500,
+                                  ),
+                                ),
+                              ],
+                            ),
+                            backgroundColor: Colors.red,
+                            elevation: 10,
+                            behavior: SnackBarBehavior.floating,
+                            margin: EdgeInsets.all(10),
+                            duration: Duration(seconds: 2),
+                            dismissDirection: DismissDirection.startToEnd,
+                            shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(20)),
+                          );
+                          ScaffoldMessenger.of(context).showSnackBar(snackBar);
+                          _emailController.text = "";
+                          _passwordController.text = "";
+                        }
+                      }
+
                       Navigator.pushReplacement(
                         context,
                         MaterialPageRoute(

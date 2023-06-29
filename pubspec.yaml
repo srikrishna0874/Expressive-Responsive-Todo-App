@@ -41,7 +41,9 @@ dependencies:
   text_divider: ^1.0.0
   percent_indicator: ^4.2.3
   intl: ^0.18.1
-  mongo_dart:
+  http:
+  shared_preferences:
+  jwt_decoder:
 
 dev_dependencies:
   flutter_test:

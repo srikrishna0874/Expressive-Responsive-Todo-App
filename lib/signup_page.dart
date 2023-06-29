@@ -1,9 +1,12 @@
+import 'dart:convert';
+
 import 'package:delayed_display/delayed_display.dart';
 import 'package:flutter/material.dart';
 import 'package:text_divider/text_divider.dart';
-import 'package:todo/db/mongodb.dart';
 import 'package:todo/showTasksPage.dart';
+import 'package:http/http.dart' as http;
 
+import 'db/constants.dart';
 import 'login_page.dart';
 
 class MySignUpPage extends StatefulWidget {
@@ -19,7 +22,35 @@ class _MySignUpPageState extends State<MySignUpPage> {
   TextEditingController emailController = TextEditingController();
   TextEditingController passwordController = TextEditingController();
   String message = "";
-  MongoDataBase mongodb = MongoDataBase();
+  bool isLoading = false;
+  Future<bool> signUpUser(
+      String username, String email, String password) async {
+    var registerBody = {
+      "username": username,
+      "email": email,
+      "password": password
+    };
+    print("Adding.....");
+    setState(() {
+      isLoading = true;
+    });
+    try {
+      var response = await http.post(
+        Uri.parse(registrationUrl),
+        headers: {"Content-Type": "application/json"},
+        body: jsonEncode(registerBody),
+      );
+      print("Added.....");
+      print("\n\n\nResponse in signup is: ${response.statusCode}\n\n\n");
+      setState(() {
+        isLoading = false;
+      });
+      return true;
+    } catch (err) {
+      print("Catch block...$err\n\n\n\n\n");
+      return false;
+    }
+  }
 
   Widget buildSuffixIcon() {
     if (isVisiblePassword == true) {
@@ -194,15 +225,45 @@ class _MySignUpPageState extends State<MySignUpPage> {
                 child: Container(
                   padding: EdgeInsets.only(left: 10, right: 10),
                   child: ElevatedButton(
-                    onPressed: () {
+                    onPressed: () async {
+                      print("Clicked!!!");
                       bool isValidDetails = validateForm();
+                      print("isValidData: $isValidDetails");
                       if (isValidDetails) {
-                        mongodb.insertForSignUp(usernameController.text,
-                            emailController.text, passwordController.text);
-                        /*Navigator.pushReplacement(
+                        await showDialog(
+                          context: context,
+                          barrierDismissible: false,
+                          builder: (BuildContext context) {
+                            return Dialog(
+                              child: Container(
+                                height: screenHeight*0.1,
+                                padding: EdgeInsets.all(16.0),
+                                child: Row(
+                                  mainAxisSize: MainAxisSize.min,
+                                  children: [
+                                    CircularProgressIndicator(),
+                                    SizedBox(
+                                      width: 16.0,
+                                    ),
+                                    Text("Please wait..."),
+                                  ],
+                                ),
+                              ),
+                            );
+                          },
+                        );
+                        Future<bool> response = signUpUser(
+                            usernameController.text,
+                            emailController.text,
+                            passwordController.text);
+
+                        if (await response) {
+                          Navigator.pushReplacement(
                             context,
                             MaterialPageRoute(
-                                builder: (context) => ShowTasksPage()));*/
+                                builder: (context) => ShowTasksPage()),
+                          );
+                        }
                       } else {
                         setState(() {
                           message = "Enter Valid Email/Password";
