@@ -1,14 +1,14 @@
 import 'dart:convert';
+import 'package:jwt_decoder/jwt_decoder.dart';
 
 import 'package:delayed_display/delayed_display.dart';
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 
-import 'package:shared_preferences/shared_preferences.dart';
 import 'package:text_divider/text_divider.dart';
 import 'package:todo/showTasksPage.dart';
 import 'package:todo/signup_page.dart';
 import 'package:http/http.dart' as http;
+import 'package:todo/utils/profile.dart';
 
 import 'db/constants.dart';
 
@@ -20,11 +20,11 @@ class MyLoginPage extends StatefulWidget {
 }
 
 class _MyLoginPageState extends State<MyLoginPage> {
-  TextEditingController _emailController = TextEditingController();
-  TextEditingController _passwordController = TextEditingController();
+  TextEditingController emailController = TextEditingController();
+  TextEditingController passwordController = TextEditingController();
   bool isVisiblePassword = true;
   String message = "";
-  late SharedPreferences prefs;
+  Profile profile=Profile();
 
   Widget buildSuffixIcon() {
     if (isVisiblePassword == true) {
@@ -54,8 +54,8 @@ class _MyLoginPageState extends State<MyLoginPage> {
     }
   }
 
-  Widget buildTextfield(
-      String hintText, IconData icon, bool isObscured, int ms) {
+  Widget buildTextfield(String hintText, IconData icon, bool isObscured,
+      TextEditingController controller, int ms) {
     return DelayedDisplay(
       delay: Duration(milliseconds: ms),
       child: Container(
@@ -72,6 +72,7 @@ class _MyLoginPageState extends State<MyLoginPage> {
           borderRadius: BorderRadius.circular(50),
         ),
         child: TextField(
+          controller: controller,
           obscureText: isObscured ? isVisiblePassword : false,
           decoration: InputDecoration(
             suffixIcon: isObscured ? buildSuffixIcon() : null,
@@ -107,43 +108,48 @@ class _MyLoginPageState extends State<MyLoginPage> {
   }
 
   bool validateForm() {
-    final email = _emailController.text;
-    final password = _passwordController.text;
+    final email = emailController.text;
+    final password = passwordController.text;
+    print(email);
+    print(password);
 
     final isEmailValid = validateEmail(email);
+
     final isPasswordValid = validatePassword(password);
+    print("Email entered:$isEmailValid");
+    print(isPasswordValid);
     return isEmailValid && isPasswordValid;
   }
 
   Future<bool> loginUser(String email, String password) async {
     var reqBody = {"email": email, "password": password};
+    print("Called!!");
 
     try {
       var response = await http.post(
-        Uri.parse(registrationUrl),
+        Uri.parse(loginUrl),
         headers: {"Content-Type": "application/json"},
         body: jsonEncode(reqBody),
       );
-      var jsonResponse = jsonDecode(response.body);
-      if (jsonResponse["status"]) {
-        return true;
-      } else {
-        return false;
-      }
+      var jsonResponse = await jsonDecode(response.body);
+      print(jsonResponse["status"]);
+        var myToken = jsonResponse["token"];
+        Map<String, dynamic> jwtDecodedToken = JwtDecoder.decode(myToken);
+          profile.email = jwtDecodedToken["email"];
+          profile.name = jwtDecodedToken["username"];
+      print("Profile's email is: ${profile.email}");
+
+
+      return true;
+
+
     } catch (error) {
       print(error);
       return false;
     }
   }
 
-  Future<void> initSharedPref() async {
-    prefs = await SharedPreferences.getInstance();
-  }
 
-  @override
-  void initState() {
-    initSharedPref();
-  }
 
   @override
   Widget build(BuildContext context) {
@@ -208,13 +214,13 @@ class _MyLoginPageState extends State<MyLoginPage> {
               SizedBox(
                 height: screenHeight * 0.08,
               ),
-              buildTextfield(
-                  "Enter your Email", Icons.email_outlined, false, 1000),
+              buildTextfield("Enter your Email", Icons.email_outlined, false,
+                  emailController, 1000),
               SizedBox(
                 height: screenHeight * 0.03,
               ),
               buildTextfield("Enter your Password", Icons.lock_outline_rounded,
-                  true, 1250),
+                  true, passwordController, 1250),
               SizedBox(
                 height: screenHeight * 0.03,
               ),
@@ -249,9 +255,11 @@ class _MyLoginPageState extends State<MyLoginPage> {
                   padding: EdgeInsets.only(left: 10, right: 10),
                   child: ElevatedButton(
                     onPressed: () async {
+                      print("Clicked\n\n\n\n\n\n");
                       bool isValidDetails = validateForm();
+                      print("isValidDetails: $isValidDetails\n\n\n\n");
                       if (isValidDetails) {
-                        await showDialog(
+                        showDialog(
                           context: context,
                           barrierDismissible: false,
                           builder: (BuildContext context) {
@@ -273,58 +281,67 @@ class _MyLoginPageState extends State<MyLoginPage> {
                             );
                           },
                         );
-                        Future<bool> response = loginUser(
-                            _emailController.text, _passwordController.text);
-                        if (await response) {
-                          Navigator.pushReplacement(
-                            context,
-                            MaterialPageRoute(
-                                builder: (context) => ShowTasksPage()),
-                          );
-                        } else {
-                          setState(() {
-                            message = "Enter Valid Email/Password";
-                          });
-                          final snackBar = SnackBar(
-                            content: Row(
-                              children: [
-                                Icon(
-                                  Icons.close,
-                                  color: Colors.white,
-                                  size: screenWidth * 0.05,
-                                ),
-                                SizedBox(
-                                  width: screenWidth * 0.01,
-                                ),
-                                Text(
-                                  message,
-                                  style: TextStyle(
+                        print("Going to call...\n\n\n\n");
+                        setState(() async {
+                          Future<bool> response = loginUser(
+                              emailController.text, passwordController.text);
+                          print("login backend done it seems....\n\n\n\n\n");
+                          print("Response after login: $response\n\n\n\n\n\n");
+                          if (await response) {
+                            print(
+                                "Name and Email are: ${profile.email}\n\n\n\n${profile.name}");
+                            Navigator.pushReplacement(
+                              context,
+                              MaterialPageRoute(
+                                  builder: (context) => ShowTasksPage(profile)),
+                            );
+                          }
+                          else {
+                            setState(() {
+                              message = "Enter Valid Email/Password";
+                            });
+                            final snackBar = SnackBar(
+                              content: Row(
+                                children: [
+                                  Icon(
+                                    Icons.close,
                                     color: Colors.white,
-                                    fontWeight: FontWeight.w500,
+                                    size: screenWidth * 0.05,
                                   ),
-                                ),
-                              ],
-                            ),
-                            backgroundColor: Colors.red,
-                            elevation: 10,
-                            behavior: SnackBarBehavior.floating,
-                            margin: EdgeInsets.all(10),
-                            duration: Duration(seconds: 2),
-                            dismissDirection: DismissDirection.startToEnd,
-                            shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(20)),
-                          );
-                          ScaffoldMessenger.of(context).showSnackBar(snackBar);
-                          _emailController.text = "";
-                          _passwordController.text = "";
-                        }
+                                  SizedBox(
+                                    width: screenWidth * 0.01,
+                                  ),
+                                  Text(
+                                    message,
+                                    style: TextStyle(
+                                      color: Colors.white,
+                                      fontWeight: FontWeight.w500,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                              backgroundColor: Colors.red,
+                              elevation: 10,
+                              behavior: SnackBarBehavior.floating,
+                              margin: EdgeInsets.all(10),
+                              duration: Duration(seconds: 2),
+                              dismissDirection: DismissDirection.startToEnd,
+                              shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(20)),
+                            );
+                            ScaffoldMessenger.of(context).showSnackBar(snackBar);
+                            emailController.text = "";
+                            passwordController.text = "";
+                          }
+                        });
+
                       }
 
-                      Navigator.pushReplacement(
+                      /*Navigator.pushReplacement(
                         context,
                         MaterialPageRoute(
                             builder: (context) => ShowTasksPage()),
-                      );
+                      );*/
                     },
                     style: ElevatedButton.styleFrom(
                       backgroundColor: Color.fromRGBO(255, 101, 36, 1),

@@ -1,10 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:percent_indicator/circular_percent_indicator.dart';
+import 'package:todo/utils/profile.dart';
 
 import 'addTasksPage.dart';
 
 class ShowTasksPage extends StatefulWidget {
-  const ShowTasksPage({Key? key}) : super(key: key);
+  const ShowTasksPage(Profile profile, {Key? key}) : super(key: key);
 
   @override
   State<ShowTasksPage> createState() => _ShowTasksPageState();

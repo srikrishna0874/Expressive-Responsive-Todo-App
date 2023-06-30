@@ -5,6 +5,7 @@ import 'package:flutter/material.dart';
 import 'package:text_divider/text_divider.dart';
 import 'package:todo/showTasksPage.dart';
 import 'package:http/http.dart' as http;
+import 'package:todo/utils/profile.dart';
 
 import 'db/constants.dart';
 import 'login_page.dart';
@@ -23,6 +24,8 @@ class _MySignUpPageState extends State<MySignUpPage> {
   TextEditingController passwordController = TextEditingController();
   String message = "";
   bool isLoading = false;
+
+  Profile profile = Profile();
   Future<bool> signUpUser(
       String username, String email, String password) async {
     var registerBody = {
@@ -236,7 +239,7 @@ class _MySignUpPageState extends State<MySignUpPage> {
                           builder: (BuildContext context) {
                             return Dialog(
                               child: Container(
-                                height: screenHeight*0.1,
+                                height: screenHeight * 0.1,
                                 padding: EdgeInsets.all(16.0),
                                 child: Row(
                                   mainAxisSize: MainAxisSize.min,
@@ -258,10 +261,12 @@ class _MySignUpPageState extends State<MySignUpPage> {
                             passwordController.text);
 
                         if (await response) {
+                          profile.email=emailController.text;
+                          profile.name=usernameController.text;
                           Navigator.pushReplacement(
                             context,
                             MaterialPageRoute(
-                                builder: (context) => ShowTasksPage()),
+                                builder: (context) => ShowTasksPage(profile)),
                           );
                         }
                       } else {
@@ -298,7 +303,6 @@ class _MySignUpPageState extends State<MySignUpPage> {
                               borderRadius: BorderRadius.circular(20)),
                         );
                         ScaffoldMessenger.of(context).showSnackBar(snackBar);
-                        usernameController.text = "";
                         emailController.text = "";
                         passwordController.text = "";
                       }
